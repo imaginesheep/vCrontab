@@ -9,6 +9,7 @@
         @hide="showCron=false"
         @fill="crontabFill"
         :expression="expression"
+        :hideComponent="hideComponent"
       ></vcrontab>
     </el-dialog>
   </div>
@@ -23,7 +24,7 @@ export default {
       input: "",
       expression: "",
       showCron: false,
-      hideComponent: ["second"],
+      hideComponent: ["second","year"],//"second","year"
     };
   },
   methods: {

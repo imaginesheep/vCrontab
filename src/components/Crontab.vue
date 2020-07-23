@@ -69,7 +69,7 @@
             <th>crontab完整表达式</th>
           </thead>
           <tbody>
-            <td>
+            <td v-if="shouldHide('second')">
               <span>{{contabValueObj.second}}</span>
             </td>
             <td>
@@ -87,7 +87,7 @@
             <td>
               <span>{{contabValueObj.week}}</span>
             </td>
-            <td>
+            <td v-if="shouldHide('year')">
               <span>{{contabValueObj.year}}</span>
             </td>
             <td>
@@ -121,6 +121,7 @@ export default {
   data() {
     return {
       tabTitles: ["秒", "分钟", "小时", "日", "月", "周", "年"],
+      tabUnit: ['second','min','hour','day','mouth','week','year'],
       tabActive: 0,
       myindex: 0,
       contabValueObj: {
@@ -138,14 +139,14 @@ export default {
   props: ["expression", "hideComponent"],
   methods: {
     shouldHide(key) {
-      if (this.hideComponent && this.hideComponent.includes(key)) return false;
+      if (this.hideComponent && this.hideComponent.length>0 && this.hideComponent.includes(key)) return false;
       return true;
     },
     resolveExp() {
       //反解析 表达式
       if (this.expression) {
         let arr = this.expression.split(" ");
-        if (arr.length >= 6) {
+        if (arr.length >= 5) {
           //6 位以上是合法表达式
           let obj = {
             second: arr[0],
@@ -326,7 +327,9 @@ export default {
   computed: {
     contabValueString: function() {
       let obj = this.contabValueObj;
-      let str =
+      let str = ''
+      if(this.shouldHide('second')){
+        str =
         obj.second +
         " " +
         obj.min +
@@ -339,6 +342,21 @@ export default {
         " " +
         obj.week +
         (obj.year == "" ? "" : " " + obj.year);
+      }else{
+        str =
+        this.shouldHide('second')? obj.second :'' +
+        " " +
+        obj.min +
+        " " +
+        obj.hour +
+        " " +
+        obj.day +
+        " " +
+        obj.mouth +
+        " " +
+        obj.week +
+        (obj.year  == "" || !this.shouldHide('year') ? "" : " " + obj.year);
+      }
       return str;
     },
   },
@@ -352,11 +370,19 @@ export default {
     CrontabYear,
     CrontabResult,
   },
+  created (){
+    if(this.hideComponent && this.hideComponent.length > 0){
+      this.hideComponent.forEach(item=>{
+        this.tabTitles.splice(this.tabUnit.indexOf(item),1)
+        this.tabUnit.splice(this.tabUnit.indexOf(item),1)
+      })
+    }
+  },
   watch: {
     expression: "resolveExp",
-    hideComponent(value) {
-      // 隐藏部分组件
-    },
+    /* hideComponent: function(val){
+      console.log(val)
+    }, */
   },
   mounted: function() {
     this.resolveExp();
